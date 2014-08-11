@@ -51,8 +51,8 @@ __isl_give isl_set* spot_get_isl_stmt_domain(__isl_keep isl_ctx* ctx,
                                              osl_statement_p stm);
 osl_relation_p      spot_isl_to_osl_dom(isl_ctx* ctx, isl_set* set);
 void                spot_add_statement(osl_scop_p scop, isl_ctx* ctx,
-                                       osl_doi_p doi);
-void                spot_compute_statements(osl_scop_p scop, osl_doi_p doi);
+                                       osl_spot_p spot);
+void                spot_compute_statements(osl_scop_p scop, osl_spot_p spot);
 void                spot_compute_scops(osl_scop_p scop);
 
 #endif /* define SPOT_H */

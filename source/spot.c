@@ -36,7 +36,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-//#include <osl/extensions/doi.h>
 #include <osl/osl.h>
 #include <clan/clan.h>
 #define CLOOG_INT_LONG
@@ -240,7 +239,7 @@ osl_relation_p spot_isl_to_osl_dom(isl_ctx * ctx, isl_set * set)
 	if (p == NULL) {
 		OSL_debug("creating printer");
 		p = isl_printer_to_str(ctx);
-		p = isl_printer_set_output_format(p, ISL_FORMAT_EXT_POLYLIB);
+		p = isl_printer_set_output_format(p, ISL_FORMAT_EXT_POLYLIB); 
 	}
 	
 	p = isl_printer_print_set(p, set);
@@ -253,7 +252,7 @@ osl_relation_p spot_isl_to_osl_dom(isl_ctx * ctx, isl_set * set)
 	return rel;
 }
 
-void spot_add_statement(osl_scop_p scop, isl_ctx * ctx, osl_doi_p doi) {
+void spot_add_statement(osl_scop_p scop, isl_ctx * ctx, osl_spot_p spot) {
 	osl_statement_p tmp, dstmt;
 	osl_body_p extb;
 
@@ -264,7 +263,7 @@ void spot_add_statement(osl_scop_p scop, isl_ctx * ctx, osl_doi_p doi) {
 	scop->statement->next = tmp;
 	// replace the original domain by new one
 	osl_relation_free(dstmt->domain);
-	dstmt->domain = spot_isl_to_osl_dom(ctx, doi->user);
+	dstmt->domain = spot_isl_to_osl_dom(ctx, spot->user);
 
 	extb = osl_generic_lookup(dstmt->extension, OSL_URI_BODY); 
 	if (extb != NULL) { 
@@ -274,16 +273,16 @@ void spot_add_statement(osl_scop_p scop, isl_ctx * ctx, osl_doi_p doi) {
 		OSL_debug("Extended Body NULL");
 	}
 	extb->expression = osl_strings_malloc();
-	osl_strings_add(extb->expression, doi->comp);
+	osl_strings_add(extb->expression, spot->comp);
 	
 	osl_statement_add(&(scop->statement), dstmt);
 }
 
-void spot_compute_statements(osl_scop_p scop, osl_doi_p doi) {
+void spot_compute_statements(osl_scop_p scop, osl_spot_p spot) {
 	isl_set *stmt_dom;
 	isl_ctx *ctx;
 	isl_space *dsp;
-	osl_doi_p di, dj;
+	osl_spot_p di, dj;
 	osl_statement_p tmp; 
 	ctx = isl_ctx_alloc();		 
 	assert(ctx);
@@ -296,7 +295,7 @@ void spot_compute_statements(osl_scop_p scop, osl_doi_p doi) {
 	dsp = isl_set_get_space(stmt_dom);
 	
 	// compute new domains and wrap them into statements
-	for (di = doi; di != NULL; di = di->next) {
+	for (di = spot; di != NULL; di = di->next) {
 		int pflag = 0;
 				
 		if (di->user == NULL) { 
@@ -311,14 +310,13 @@ void spot_compute_statements(osl_scop_p scop, osl_doi_p doi) {
 	
 		if (di->comp != NULL) {
 			// solve priority overlapping 
-			for (dj = doi; dj != NULL; dj = dj->next) {
+			for (dj = spot; dj != NULL; dj = dj->next) {
 				
 				if (dj->user == NULL) {
 					dj->user = isl_set_read_from_str(ctx, dj->dom);
 					dj->user = isl_set_align_params(dj->user, isl_space_copy(dsp));
 				}
-				
-			
+							
 				if (dj->user == NULL) 
 					SPOT_error("Impossible to read isl domain");
 					
@@ -327,7 +325,7 @@ void spot_compute_statements(osl_scop_p scop, osl_doi_p doi) {
 				else if (di->priority == dj->priority && pflag == 0)
 					pflag = 1; 
 				else if (di->priority == dj->priority) 
-					SPOT_error("More than one element with the same prority in the doi list"); 	
+					SPOT_error("More than one element with the same prority in the spot list"); 	
 			}
 			
 			if (isl_set_is_empty(di->user)) 
@@ -348,7 +346,7 @@ void spot_compute_statements(osl_scop_p scop, osl_doi_p doi) {
 	} 
 	
   // free isl stuff
-  for (di = doi; di != NULL; di = di->next)
+  for (di = spot; di != NULL; di = di->next)
 		isl_set_free(di->user);
 	isl_set_free(stmt_dom);
 	
@@ -359,21 +357,21 @@ void spot_compute_statements(osl_scop_p scop, osl_doi_p doi) {
 
 
 void spot_compute_scops(osl_scop_p scop) { 
-	osl_doi_p doi; 
+	osl_spot_p spot; 
 
 	while (scop != NULL) {
-		// get doi extension 
-		doi = osl_generic_lookup(scop->extension, OSL_URI_DOI); 
+		// get spot extension 
+		spot = osl_generic_lookup(scop->extension, OSL_URI_SPOT); 
 		
-		if (doi == NULL) {  scop = scop->next;  continue; }
+		if (spot == NULL) {  scop = scop->next;  continue; }
 
 		if (scop->statement == NULL || scop->statement->next != NULL) { 
 			scop = scop->next;
 			continue; 
 		}
-		spot_compute_statements(scop, doi);
-		// once applied, remove doi extension
-		osl_generic_remove(&(scop->extension), OSL_URI_DOI);
+		spot_compute_statements(scop, spot);
+		// once applied, remove spot extension
+		osl_generic_remove(&(scop->extension), OSL_URI_SPOT);
 		
 		scop = scop->next; 
 	}
