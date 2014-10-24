@@ -65,6 +65,7 @@ void spot_scop_print_to_c(FILE* output, osl_scop_p scop) {
   state = cloog_state_malloc();
   options = cloog_options_malloc(state);
   options->openscop = 1;
+  options->backtrack = 1;
   cloog_options_copy_from_osl_scop(scop, options);
   input = cloog_input_from_osl_scop(options->state, scop);
   
