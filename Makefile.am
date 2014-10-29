@@ -41,22 +41,22 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 
-if BUNDLED_ISL
-    MAYBE_ISL = usr/src/isl
-    ISL_LA = $(top_builddir)/usr/src/isl/libisl.la
-endif
-if BUNDLED_OSL
-    MAYBE_OSL = usr/src/osl
-    OSL_LA = $(top_builddir)/usr/src/osl/libosl.la
-endif
-if BUNDLED_CLAN
-    MAYBE_CLAN = usr/src/clan
-    CLAN_LA = $(top_builddir)/usr/src/clan/libclan.la
-endif
-if BUNDLED_CLOOG
-    MAYBE_CLOOG = usr/src/cloog
-    CLOOG_LA = $(top_builddir)/usr/src/cloog/libcloog-isl.la
-endif
+#if BUNDLED_ISL
+#    MAYBE_ISL = usr/src/isl
+#    ISL_LA = $(top_builddir)/usr/src/isl/libisl.la
+#endif
+#if BUNDLED_OSL
+#    MAYBE_OSL = usr/src/osl
+#    OSL_LA = $(top_builddir)/usr/src/osl/libosl.la
+#endif
+#if BUNDLED_CLAN
+#    MAYBE_CLAN = usr/src/clan
+#    CLAN_LA = $(top_builddir)/usr/src/clan/libclan.la
+#endif
+#if BUNDLED_CLOOG
+#    MAYBE_CLOOG = usr/src/cloog
+#    CLOOG_LA = $(top_builddir)/usr/src/cloog/libcloog-isl.la
+#endif
 
 SUBDIRS         = $(MAYBE_ISL) $(MAYBE_OSL) $(MAYBE_CLAN) $(MAYBE_CLOOG) doc
 DIST_SUBDIRS    = $(MAYBE_ISL) $(MAYBE_OSL) $(MAYBE_CLAN) $(MAYBE_CLOOG) doc

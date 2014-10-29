@@ -33,7 +33,7 @@
  | Written by Cedric Bastoul, Cedric.Bastoul@unistra.fr                     |
  +--------------------------------------------------------------------------*/
 
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <osl/osl.h>
@@ -56,13 +56,24 @@ int main(int argc, char* argv[]) {
   if (input == NULL)
     SPOT_error("cannot open input file");
 
+
   scop = spot_scop_read_from_c(input, argv[1]);
 	if (scop == NULL) { 
 		SPOT_info("Null SCOP, exiting..");
 		return 0;
 	}
+
+
+	//printf("computing scops\n");
+
 	spot_compute_scops(scop);
+
+	//printf("printing to c\n"); 
+	
 	spot_scop_print_to_c(stdout, scop);
+
+	//printf("freeing stuff\n");
+
 	osl_scop_free(scop);
   
   fclose(input);

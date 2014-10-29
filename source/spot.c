@@ -1,4 +1,3 @@
-
    /*--------------------------------------------------------------------+
     |                              Spot                                  |
     |--------------------------------------------------------------------|
@@ -119,13 +118,11 @@ static __isl_give isl_set *osl_relation_to_isl_set(osl_relation_p relation,
     int n_eq = 0, n_ineq = 0;
     isl_ctx *ctx;
     isl_mat *eq, *ineq;
-    isl_int v;
+    isl_val *v;
     isl_basic_set *bset;
 
-    isl_int_init(v);
-
     ctx = isl_dim_get_ctx(dim);
-
+    v = isl_val_zero(ctx);
     for (i = 0; i < relation->nb_rows; ++i)
         if (osl_int_zero(relation->precision, relation->m[i][0]))
             n_eq++;
@@ -150,12 +147,12 @@ static __isl_give isl_set *osl_relation_to_isl_set(osl_relation_p relation,
 
         for (j = 0; j < relation->nb_columns - 1; ++j) {
             int t = osl_int_get_si(relation->precision, relation->m[i][1 + j]);
-            isl_int_set_si(v, t);
-            *m = isl_mat_set_element(*m, row, j, v);
+            v = isl_val_set_si(v, t);
+            *m = isl_mat_set_element_val(*m, row, j, isl_val_copy(v));
         }
     }
 
-    isl_int_clear(v);
+    isl_val_free(v);
 
     bset = isl_basic_set_from_constraint_matrices(dim, eq, ineq,
             isl_dim_set, isl_dim_div, isl_dim_param, isl_dim_cst);
@@ -222,10 +219,11 @@ spot_get_isl_stmt_domain(__isl_keep isl_ctx * ctx, osl_scop_p scop, osl_statemen
 	if(niter){
 		osl_body_p stmt_body = osl_statement_get_body(stm);//(osl_body_p)(stm->body->data);
 		dim = set_names(dim, isl_dim_set, stmt_body->iterators->string);
-	} 
+	}
 	dom = osl_relation_list_to_isl_set(stm->domain, isl_dim_copy(dim));
 	dom = isl_set_intersect_params(dom, isl_set_copy(context));
-	
+
+	//isl_set_print(dom, stdout, 0, ISL_FORMAT_ISL);
 	// free stuff
 	isl_set_free(context);
 	return dom;
@@ -289,12 +287,14 @@ void spot_compute_statements(osl_scop_p scop, osl_spot_p spot) {
 	assert(ctx);
 	isl_options_set_on_error(ctx, ISL_ON_ERROR_ABORT);
 	
-	// get an isl set from the original domain
+
+	// get an isl set from the original domain	
 	stmt_dom = spot_get_isl_stmt_domain(ctx, scop, scop->statement);	
 	if (stmt_dom == NULL) 
 		SPOT_error("Impossible to convert statement domain to isl");
 	dsp = isl_set_get_space(stmt_dom);
 	
+
 	// compute new domains and wrap them into statements
 	for (di = spot; di != NULL; di = di->next) {
 		int pflag = 0;
@@ -345,6 +345,7 @@ void spot_compute_statements(osl_scop_p scop, osl_spot_p spot) {
 		osl_relation_free(scop->statement->domain); 
 		scop->statement->domain = spot_isl_to_osl_dom(ctx, stmt_dom);
 	} 
+
 	
   // free isl stuff
   for (di = spot; di != NULL; di = di->next)
@@ -358,20 +359,25 @@ void spot_compute_statements(osl_scop_p scop, osl_spot_p spot) {
 
 
 void spot_compute_scops(osl_scop_p scop) { 
-	osl_spot_p spot; 
+	osl_spot_p spot;
+
 
 	while (scop != NULL) {
-		// get spot extension 
+		// get spot extension
+		
 		spot = osl_generic_lookup(scop->extension, OSL_URI_SPOT); 
 		
+		
+
 		if (spot == NULL) {  scop = scop->next;  continue; }
 
 		if (scop->statement == NULL || scop->statement->next != NULL) { 
 			scop = scop->next;
 			continue; 
 		}
+
 		spot_compute_statements(scop, spot);
-		// once applied, remove spot extension
+		// once applied, remove spot extension	
 		osl_generic_remove(&(scop->extension), OSL_URI_SPOT);
 		
 		scop = scop->next; 

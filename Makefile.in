@@ -132,7 +132,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(pkgincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libspot_la_DEPENDENCIES = $(ISL_LA) $(OSL_LA) $(CLAN_LA) $(CLOOG_LA)
+libspot_la_DEPENDENCIES =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libspot_la_OBJECTS = source/libspot_la-spot.lo
 libspot_la_OBJECTS = $(am_libspot_la_OBJECTS)
@@ -366,14 +366,23 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
-@BUNDLED_ISL_TRUE@MAYBE_ISL = usr/src/isl
-@BUNDLED_ISL_TRUE@ISL_LA = $(top_builddir)/usr/src/isl/libisl.la
-@BUNDLED_OSL_TRUE@MAYBE_OSL = usr/src/osl
-@BUNDLED_OSL_TRUE@OSL_LA = $(top_builddir)/usr/src/osl/libosl.la
-@BUNDLED_CLAN_TRUE@MAYBE_CLAN = usr/src/clan
-@BUNDLED_CLAN_TRUE@CLAN_LA = $(top_builddir)/usr/src/clan/libclan.la
-@BUNDLED_CLOOG_TRUE@MAYBE_CLOOG = usr/src/cloog
-@BUNDLED_CLOOG_TRUE@CLOOG_LA = $(top_builddir)/usr/src/cloog/libcloog-isl.la
+
+#if BUNDLED_ISL
+#    MAYBE_ISL = usr/src/isl
+#    ISL_LA = $(top_builddir)/usr/src/isl/libisl.la
+#endif
+#if BUNDLED_OSL
+#    MAYBE_OSL = usr/src/osl
+#    OSL_LA = $(top_builddir)/usr/src/osl/libosl.la
+#endif
+#if BUNDLED_CLAN
+#    MAYBE_CLAN = usr/src/clan
+#    CLAN_LA = $(top_builddir)/usr/src/clan/libclan.la
+#endif
+#if BUNDLED_CLOOG
+#    MAYBE_CLOOG = usr/src/cloog
+#    CLOOG_LA = $(top_builddir)/usr/src/cloog/libcloog-isl.la
+#endif
 SUBDIRS = $(MAYBE_ISL) $(MAYBE_OSL) $(MAYBE_CLAN) $(MAYBE_CLOOG) doc
 DIST_SUBDIRS = $(MAYBE_ISL) $(MAYBE_OSL) $(MAYBE_CLAN) $(MAYBE_CLOOG) doc
 ACLOCAL_AMFLAGS = -I m4
